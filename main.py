@@ -1,17 +1,16 @@
 import sys
 from PySide6 import QtCore, QtWidgets, QtGui
 # import os
+import json
 import glob
 
-# class ComponentList(QtWidgets.QListWidget):
-#     def __init__(self):
-#         super().__init__()
+class MainWidget(QtWidgets.QWidget):
 
-
-class MyWidget(QtWidgets.QWidget):
-    def item_selected(item):
-        print("asdfasdfas")
-        print(item)
+    def item_clicked(self, item: QtWidgets.QListWidgetItem):
+        print(f"Hello: {item.text()}")
+        with open(self.fpath[:-1] + item.text(), "r") as file:
+            attrs = json.load(file)
+            print(attrs)
 
     def __init__(self):
         super().__init__()
@@ -19,14 +18,14 @@ class MyWidget(QtWidgets.QWidget):
         self.parts = []
         list_widget: QtWidgets.QListWidget = QtWidgets.QListWidget()
         ficon : QtGui.QIcon     = QtGui.QIcon("file.xpm")
-        fpath : str             = "./components/*"
-        components : list[str]  = glob.glob(fpath)
+        self.fpath : str        = "./components/*"
+        components : list[str]  = glob.glob(self.fpath)
 
         for c in components:
-            c = c[(len(fpath) - 1) :]
+            c = c[(len(self.fpath) - 1) :]
             self.parts.append(QtWidgets.QListWidgetItem(ficon, c))
 
-        list_widget.itemClicked = self.item_selected
+        list_widget.itemClicked.connect(self.item_clicked)
 
         self.layout = QtWidgets.QVBoxLayout(self)
         for p in self.parts:
@@ -35,7 +34,7 @@ class MyWidget(QtWidgets.QWidget):
 
 app = QtWidgets.QApplication([])
 
-widget = MyWidget()
+widget = MainWidget()
 widget.resize(800, 600)
 widget.show()
 
