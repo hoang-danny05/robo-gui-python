@@ -30,6 +30,7 @@ class MainWidget(QtWidgets.QMainWindow):
         with open(self.fpath[:-1] + item.text(), "r") as file:
             attrs : dict = json.load(file)
             keys = attrs.keys()
+            self.modes = attrs
             print(attrs)
         # self.list_widget.addItems(["test"])
         # it dynamically chaanges the display
@@ -55,6 +56,24 @@ class MainWidget(QtWidgets.QMainWindow):
 
     def modes_selected(self, item: QtWidgets.QListWidgetItem):
         print(f"mode selected: {item.text()}")
+        if (self.modes[item.text()]):
+            print("Available")
+            QtWidgets.QMessageBox.about(
+                self,
+                f"{item.text()} Status",
+                "This value is set. There should be something here but danny was lazy."
+            )
+        else:
+            print("Not available. Do you want to create your own?")
+            response = QtWidgets.QMessageBox.question(
+                self,
+                f"{item.text()} Status",
+                "This part is not currently configured for this type of feeder. Do you want to create a new path?",
+                QtWidgets.QMessageBox.StandardButton.Yes,
+                QtWidgets.QMessageBox.StandardButton.No
+            )
+            res = "Yes" if (response == QtWidgets.QMessageBox.StandardButton.Yes) else "No"
+            print(f"recieved response: {res}")
         pass
 
     #prefix screen-unique methods with the screen name
@@ -69,19 +88,32 @@ class MainWidget(QtWidgets.QMainWindow):
         super().__init__()
 
         ##### MAINWINDOW COMPONENTS
+        self.setWindowTitle("Robot GUI Application")
         # use default status bar
         # you can add perm widgets to the status bar
         self.statusBar().showMessage("Welcome to the Robot GUI")
 
+        ### Menu Bar Stuff
         menu_bar = self.menuBar()
         #TODO: change this to a menu and add useful stuff here
         file_action = menu_bar.addAction("File")
-        file_action.triggered.connect(lambda :print("hello world"))
+        file_action.triggered.connect(lambda :print("There are no file options right now."))
+        about_action = menu_bar.addAction("About")
+        def about_dialog():
+            QtWidgets.QMessageBox.about(
+                self,
+                f"About the App",
+                "This app is in super super beta. Made by Danny Hoang for Hyrel Technologies. Please tell him if anything is super wrong, thank you."
+            )
+        about_action.triggered.connect(about_dialog)
 
+
+        ### Tool Bar Stuff
         toolbar = self.addToolBar("Navigation")
         go_back_icon = QtGui.QIcon("./assets/left-undo.png")
         go_back_action : QtWidgets.QWidgetAction = toolbar.addAction("Go Back")
         go_back_action.setIcon(go_back_icon)
+        go_back_action.setText("Back")
         go_back_action.triggered.connect(self.navigate_back)
 
         # self.next_page = self.load_modes
