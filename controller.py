@@ -130,14 +130,15 @@ class ControllerView(QtWidgets.QWidget):
         self.setLayout(wrf_form)
 
 
-class Controller(QtWidgets.QMainWindow):
+class Controller(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         self.model = ControllerModel()
         self.view = ControllerView()
         self.view.input_signal.connect(self.model.input_signal_handler)
-        self.setCentralWidget(self.view)
+        self.setLayout(QtWidgets.QHBoxLayout())
+        self.layout().addWidget(self.view)
 
         self.show()
 
