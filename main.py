@@ -110,7 +110,7 @@ class MainWidget(QtWidgets.QMainWindow):
 
         ### Tool Bar Stuff
         toolbar = self.addToolBar("Navigation")
-        go_back_icon = QtGui.QIcon("./assets/left-undo.png")
+        go_back_icon = QtGui.QIcon("./assets/left_undo.xpm")
         go_back_action : QtWidgets.QWidgetAction = toolbar.addAction("Go Back")
         go_back_action.setIcon(go_back_icon)
         go_back_action.setText("Back")
