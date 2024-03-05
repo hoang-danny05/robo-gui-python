@@ -10,7 +10,12 @@ class Direction(IntEnum):
     UP      = 0b0001
 
 class ParamType(IntEnum):
-    X_VALUE = 0b0010
+    X_VALUE =  0b0010
+    Y_VALUE =  0b0100
+    Z_VALUE =  0b0110
+    RX_VALUE = 0b1010
+    RY_VALUE = 0b1100
+    RZ_VALUE = 0b1110
     
 
 class ControllerModel(QtCore.QObject):
@@ -47,9 +52,29 @@ class ControllerModel(QtCore.QObject):
         # print(f"equality: {type == (ParamType.X_VALUE + Direction.UP)}")
         match (type):
             case 0b0010: #(ParamType.X_VALUE.value + Direction.DOWN.value):
-                print("x down", value)
+                print("X down", value)
             case 0b0011: #(ParamType.X_VALUE.value + Direction.UP.value):
-                print("x up", value)
+                print("X up", value)
+            case 0b0100: 
+                print("Y down", value)
+            case 0b0101: 
+                print("Y up", value)
+            case 0b0110: 
+                print("Z down", value)
+            case 0b0111: 
+                print("Z up", value)
+            case 0b1010:
+                print("RX down", value)
+            case 0b1011:
+                print("RX up", value)
+            case 0b1100: 
+                print("RY down", value)
+            case 0b1101: 
+                print("RY up", value)
+            case 0b1110: 
+                print("RZ down", value)
+            case 0b1111: 
+                print("RZ up", value)
 
 class ControllerView(QtWidgets.QWidget):
 
@@ -63,6 +88,7 @@ class ControllerView(QtWidgets.QWidget):
         l_ico = self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ArrowDown)
         left_button.setIcon(l_ico)
         left_button.clicked.connect(lambda : self.input_signal.emit(param | Direction.DOWN, 5))
+        left_button.setFixedSize(50, 30)
         # left_button.clicked.connect(lambda : print("going down!"))
 
         #right
@@ -71,6 +97,7 @@ class ControllerView(QtWidgets.QWidget):
         right_button.setIcon(r_ico)
         # right_button.clicked.connect(lambda :print("hello"))
         right_button.clicked.connect(lambda : self.input_signal.emit(param | Direction.UP, 5))
+        right_button.setFixedSize(50, 30)
 
         layout.addWidget(left_button)
         layout.addWidget(right_button)
@@ -84,7 +111,21 @@ class ControllerView(QtWidgets.QWidget):
 
         wrf_form = QtWidgets.QFormLayout()
         self.setLayout(wrf_form)
-        wrf_form.addRow(QtWidgets.QLabel("this is the x row"), self.control_row(ParamType.X_VALUE))
+
+        labelfont: QtGui.QFont = QtGui.QFont()
+        labelfont.setPointSize(15)
+        labelfont.setBold(True)
+        parameters = ["X", "Y", "Z", "RX", "RY", "RZ"]
+        for (ind, param) in enumerate(parameters): 
+            param_label = QtWidgets.QLabel(param)
+            param_label.setFont(labelfont)
+            #make sure that the index matches my binary code
+            wrf_form.addRow(param_label, self.control_row(ParamType.X_VALUE + 2*ind if (ind < 3) else ParamType.X_VALUE + 2*ind + 2))
+        # wrf_form.addRow(QtWidgets.QLabel("Y"), self.control_row(ParamType.Y_VALUE))
+        # wrf_form.addRow(QtWidgets.QLabel("Z"), self.control_row(ParamType.Z_VALUE))
+        # wrf_form.addRow(QtWidgets.QLabel("rx"), self.control_row(ParamType.RX_VALUE))
+        # wrf_form.addRow(QtWidgets.QLabel("ry"), self.control_row(ParamType.RY_VALUE))
+        # wrf_form.addRow(QtWidgets.QLabel("rz"), self.control_row(ParamType.RZ_VALUE))
 
         self.setLayout(wrf_form)
 
