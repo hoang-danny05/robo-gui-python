@@ -1,6 +1,8 @@
 import sys
 from PySide6 import QtCore, QtWidgets, QtGui
 from enum import IntEnum
+from mecademicpy import robot as Mecademic
+import mecademicpy.robot_classes
 
 # InputType = Enum("InputType", ["X_DOWN", "X_UP"])
 class Direction(IntEnum):
@@ -13,7 +15,30 @@ class ParamType(IntEnum):
 
 class ControllerModel(QtCore.QObject):
     #this class can accept a signal that takes in a single string as the error message
+    #The program must exit
+    terminal_error = QtCore.Signal(str)
+    #general error
     error = QtCore.Signal(str)
+    #error on connection
+    connection_error = QtCore.Signal(str)
+
+    def attempt_connect(self):
+        self.robot : Mecademic.Robot = Mecademic.Robot()
+        try:
+            self.robot.Connect(
+                address="192.168.0.100",
+                enable_synchronous_mode=True, 
+                disconnect_on_exception=False
+            )
+        except mecademicpy.robot_classes.CommunicationError as ce:
+            self.connection_error.emit(ce)
+            #maybe you can just call this class again
+    
+    def home_robot(self):
+        try:
+            self.robot.ActivateAndHome()
+        except Exception as e:
+            self.terminal_error
 
     def MoveJoints(self, list):
         print(f"List to move: {list}")
@@ -27,6 +52,7 @@ class ControllerModel(QtCore.QObject):
                 print("x up", value)
 
 class ControllerView(QtWidgets.QWidget):
+
     input_signal = QtCore.Signal(int, float)
 
     def control_row(self, param: ParamType):
