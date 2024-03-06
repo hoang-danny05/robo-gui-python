@@ -50,6 +50,9 @@ class MainView(QtWidgets.QWidget):
     # component_clicked = QtCore.Signal(QtWidgets.QListWidgetItem)
 
     # the default starting screen
+    """
+    SCREENS TO BE LOADED BY THE APPLICATION
+    """
     def load_components(self):
         self.list_widget.clear()
         self.parts = []
@@ -89,9 +92,10 @@ class MainView(QtWidgets.QWidget):
     """
     the view init
     """
-    def __init__(self, parent: QtWidgets.QMainWindow):
+    def __init__(self, parent: QtWidgets.QMainWindow, model: MainModel):
         super().__init__()
         self.parent = parent
+        self.model = model
         self.setLayout(QtWidgets.QVBoxLayout())
 
         #stacks store a lot of widgets
@@ -108,14 +112,18 @@ class MainView(QtWidgets.QWidget):
         self.load_components()
         pass
 
+    """
+    Parent Widget Menu Logic
+    """
     def renderParent(self):
         menu_bar = self.parent.menuBar()
         #TODO: change this to a menu and add useful stuff here
         file_action = menu_bar.addAction("File")
         file_action.triggered.connect(lambda :print("There are no file options right now."))
+        # file_action = menu_bar.addAction("File")
+        # file_action.triggered.connect(lambda :print("There are no file options right now."))
         about_action = menu_bar.addAction("About")
         about_action.triggered.connect(lambda : self.parent.model.about_dialog(self.parent))
-
 
         ### Tool Bar Stuff
         toolbar = self.parent.addToolBar("Navigation")
@@ -123,7 +131,6 @@ class MainView(QtWidgets.QWidget):
         go_back_action : QtWidgets.QWidgetAction = toolbar.addAction("Go Back")
         go_back_action.setIcon(go_back_icon)
         go_back_action.setText("Back")
-        # go_back_action.triggered.connect(self.parent.navigate_back)
 
 class MainWidget(QtWidgets.QMainWindow):
     def __init__(self):
@@ -136,7 +143,7 @@ class MainWidget(QtWidgets.QMainWindow):
         self.statusBar().showMessage("Welcome to the Robot GUI")
 
         self.model = MainModel(self)
-        self.view = MainView(self)
+        self.view = MainView(self, self.model)
         self.view.renderParent()
         ### Menu Bar Stuff
         self.setCentralWidget(self.view)

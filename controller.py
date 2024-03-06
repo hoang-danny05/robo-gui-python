@@ -80,6 +80,24 @@ class ControllerView(QtWidgets.QWidget):
 
     input_signal = QtCore.Signal(int, float)
 
+    """
+    PARSE MAGNITUDE
+        PARSES THE MAGNITUDE INPUT FIELD
+        RETURNS A GUARANTEED INTEGER
+    """
+    def parseMagnitude(self) -> float:
+        try:
+            mag = float(self.magnitude.text())
+            return mag
+        except Exception as e:
+            print(f"Error processing int: {e}")
+            QtWidgets.QMessageBox.warning(
+               self, 
+               "Invalid Magnitude",
+               "The magnitude that you entered is invalid. Please enter an integer or decimal number as input."
+            )
+            return 0.0
+    
     def control_row(self, param: ParamType):
         layout = QtWidgets.QHBoxLayout()
 
@@ -87,7 +105,7 @@ class ControllerView(QtWidgets.QWidget):
         left_button = QtWidgets.QPushButton()
         l_ico = self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ArrowDown)
         left_button.setIcon(l_ico)
-        left_button.clicked.connect(lambda : self.input_signal.emit(param | Direction.DOWN, 5))
+        left_button.clicked.connect(lambda : self.input_signal.emit(param | Direction.DOWN, self.parseMagnitude()))
         left_button.setFixedSize(50, 30)
         # left_button.clicked.connect(lambda : print("going down!"))
 
@@ -96,7 +114,7 @@ class ControllerView(QtWidgets.QWidget):
         r_ico = self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ArrowUp)
         right_button.setIcon(r_ico)
         # right_button.clicked.connect(lambda :print("hello"))
-        right_button.clicked.connect(lambda : self.input_signal.emit(param | Direction.UP, 5))
+        right_button.clicked.connect(lambda : self.input_signal.emit(param | Direction.UP, self.parseMagnitude()))
         right_button.setFixedSize(50, 30)
 
         layout.addWidget(left_button)
@@ -106,28 +124,48 @@ class ControllerView(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        # tab_layout = QtWidgets.QTabWidget()
-        # self.()
+        top_layer_form = QtWidgets.QFormLayout(self)
+        self.setLayout(top_layer_form)
+        self.title_font = QtGui.QFont()
+        self.title_font.setBold(True)
+        self.title_font.setPointSize(18)
+        title = QtWidgets.QLabel("Robot Training Interface")
+        title.setFont(self.title_font)
+        top_layer_form.addWidget(title)
 
-        wrf_form = QtWidgets.QFormLayout()
-        self.setLayout(wrf_form)
+        # TAB WIDGET
+        tab_widget = QtWidgets.QTabWidget(self)
+        top_layer_form.addWidget(tab_widget)
 
-        labelfont: QtGui.QFont = QtGui.QFont()
-        labelfont.setPointSize(15)
-        labelfont.setBold(True)
+        ## WRF WIDGET
+        wrf_widget = QtWidgets.QWidget(tab_widget)
+        wrf_form = QtWidgets.QFormLayout(tab_widget)
+        wrf_widget.setLayout(wrf_form)
+        
+
+        ### PARAMETER ROWS
+        paramfont: QtGui.QFont = QtGui.QFont()
+        paramfont.setPointSize(15)
+        paramfont.setBold(True)
         parameters = ["X", "Y", "Z", "RX", "RY", "RZ"]
         for (ind, param) in enumerate(parameters): 
             param_label = QtWidgets.QLabel(param)
-            param_label.setFont(labelfont)
+            param_label.setFont(paramfont)
             #make sure that the index matches my binary code
             wrf_form.addRow(param_label, self.control_row(ParamType.X_VALUE + 2*ind if (ind < 3) else ParamType.X_VALUE + 2*ind + 2))
-        # wrf_form.addRow(QtWidgets.QLabel("Y"), self.control_row(ParamType.Y_VALUE))
-        # wrf_form.addRow(QtWidgets.QLabel("Z"), self.control_row(ParamType.Z_VALUE))
-        # wrf_form.addRow(QtWidgets.QLabel("rx"), self.control_row(ParamType.RX_VALUE))
-        # wrf_form.addRow(QtWidgets.QLabel("ry"), self.control_row(ParamType.RY_VALUE))
-        # wrf_form.addRow(QtWidgets.QLabel("rz"), self.control_row(ParamType.RZ_VALUE))
+        
+        ### MAGNITIDE OF ADJUSTMENT
+        mag_layout = QtWidgets.QHBoxLayout()
+        self.magnitude = QtWidgets.QLineEdit()
+        self.magnitude.setText("1")
+        mag_layout.addWidget(self.magnitude)
+        mag_label = QtWidgets.QLabel("mm")
+        mag_layout.addWidget(mag_label)
+        wrf_form.addRow("Adjustment:", mag_layout)
 
-        self.setLayout(wrf_form)
+        tab_widget.addTab(wrf_widget, "WRF")
+        tab_widget.addTab(QtWidgets.QLabel("WORK IN PROGRESS"), "Joint")
+        # self.setLayout(layout)
 
 
 class Controller(QtWidgets.QWidget):
@@ -147,6 +185,6 @@ if __name__ == "__main__":
 
     widget = Controller()
     widget.resize(800, 600)
-    widget.show()
+    # widget.show()
 
     sys.exit(app.exec())
