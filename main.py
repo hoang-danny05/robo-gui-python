@@ -42,6 +42,29 @@ class MainModel(QtCore.QObject):
             print(f"recieved response: {res}")
         pass
 
+    # if the user adds a new setting for a part
+    def add_part_triggered(self): 
+        text, ok = QtWidgets.QInputDialog().getText(
+            self.parent, 
+            "QInputDialog.getText()", 
+            "Part Name: ", 
+            QtWidgets.QLineEdit.EchoMode.Normal,
+            QtCore.QDir.home().dirName()
+        )
+
+        if ok and text: 
+            print(text)
+            if (os.path.exists(f"./components/{text}")):
+                print("IT EXISTS!!!!!")
+            #check if part already exists
+            #if exists, prompt that part already exists. 
+            #if not exists, create.
+        else: 
+            pass
+
+    def add_instruction_triggered(self):
+        pass
+
     # def nav_back(self):
         # self.parent.view.disconnect(self.load)
     
@@ -55,6 +78,7 @@ class MainView(QtWidgets.QWidget):
     """
     def load_components(self):
         self.list_widget.clear()
+        self.add_action.triggered.connect(self.model.add_part_triggered)
         self.parts = []
         ficon : QtGui.QIcon     = QtGui.QIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_FileIcon))
         self.fpath : str        = "./components/*"
@@ -71,7 +95,10 @@ class MainView(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def load_modes(self, component : QtWidgets.QListWidgetItem):
-        self.list_widget.itemClicked.disconnect(self.load_modes)
+        self.list_widget.itemClicked.disconnect(self.load_modes) #This is no longer the action executed 
+        self.add_action.triggered.disconnect(self.model.add_part_triggered)
+        self.add_action.triggered.connect(self.model.add_instruction_triggered)
+        #add option to add new thing
         comp_name = component.text()
         self.list_widget.itemClicked.connect(lambda feeder : self.load_controller(comp_name, feeder.text()))
         print(f"Hello: {comp_name}")
@@ -85,6 +112,7 @@ class MainView(QtWidgets.QWidget):
         self.list_widget.addItems(keys)
     
     def load_controller(self, component, feeder_type):
+        self.add_action.triggered.disconnect(self.model.add_instruction_triggered)
         #i pre did the text() methods, we might not want that.
         print(f"Now configuring {component} with a {feeder_type} feeder.")
         self.stack.setCurrentIndex(1)
@@ -109,6 +137,9 @@ class MainView(QtWidgets.QWidget):
 
         self.layout().addWidget(self.stack)
 
+        #menu bar stuff
+        self.add_action = parent.menuBar().addAction("Add")
+
         self.load_components()
         pass
 
@@ -124,6 +155,7 @@ class MainView(QtWidgets.QWidget):
         # file_action.triggered.connect(lambda :print("There are no file options right now."))
         about_action = menu_bar.addAction("About")
         about_action.triggered.connect(lambda : self.parent.model.about_dialog(self.parent))
+
 
         ### Tool Bar Stuff
         toolbar = self.parent.addToolBar("Navigation")
