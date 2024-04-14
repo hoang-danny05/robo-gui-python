@@ -1,5 +1,5 @@
 {
-    "name": "soi/urmom",
+    "name": "soi/tube",
     "instructions": [
         {"name": "MoveJoints", "parameters": [90, 0, 0, 0, 0, 0]},
         {"name": "Note", "parameters": "This is a note!"}

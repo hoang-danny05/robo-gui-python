@@ -16,7 +16,7 @@ class MainModel(QtCore.QObject):
             parent,
             f"About the App",
             "This app is in super super beta. Made by Danny Hoang for Hyrel Technologies. Please tell him if anything is super wrong, thank you."
-    )
+        )
 
     #interaction events
 
@@ -44,7 +44,7 @@ class MainModel(QtCore.QObject):
 
     # if the user adds a new setting for a part
     def add_part_triggered(self): 
-        text, ok = QtWidgets.QInputDialog().getText(
+        part_name, ok = QtWidgets.QInputDialog().getText(
             self.parent, 
             "QInputDialog.getText()", 
             "Part Name: ", 
@@ -52,10 +52,19 @@ class MainModel(QtCore.QObject):
             QtCore.QDir.home().dirName()
         )
 
-        if ok and text: 
-            print(text)
-            if (os.path.exists(f"./components/{text}")):
-                print("IT EXISTS!!!!!")
+        if ok and part_name: 
+            if (os.path.exists(f"./components/{part_name}")):
+                QtWidgets.QMessageBox.about(
+                    self.parent,
+                    "File already exists",
+                    "This instruction set already exists. Click on it to edit it."
+                )
+                pass
+            os.mkdir(f"./components/{part_name}")
+            ficon : QtGui.QIcon     = QtGui.QIcon(pixmap=QtWidgets.QStyle.SP_MessageBoxCritical)
+            self.parent.view.load_modes(QtWidgets.QListWidgetItem(ficon, part_name))
+            
+
             #check if part already exists
             #if exists, prompt that part already exists. 
             #if not exists, create.
@@ -63,7 +72,7 @@ class MainModel(QtCore.QObject):
             pass
 
     def add_instruction_triggered(self):
-        pass
+        print("asdfasdf")
 
     # def nav_back(self):
         # self.parent.view.disconnect(self.load)
@@ -102,14 +111,11 @@ class MainView(QtWidgets.QWidget):
         comp_name = component.text()
         self.list_widget.itemClicked.connect(lambda feeder : self.load_controller(comp_name, feeder.text()))
         print(f"Hello: {comp_name}")
-        keys = []
-        with open(self.fpath[:-1] + comp_name, "r") as file:
-            attrs : dict = json.load(file)
-            keys = attrs.keys()
-            self.modes = attrs
-            print(attrs)
+        self.modes = os.listdir(self.fpath[:-1] + comp_name)
+        print(f"Listing directory: {self.fpath[:-1] + comp_name}")
+        print(self.modes)
         self.list_widget.clear()
-        self.list_widget.addItems(keys)
+        self.list_widget.addItems(mode.partition(".")[0] for mode in self.modes)
     
     def load_controller(self, component, feeder_type):
         self.add_action.triggered.disconnect(self.model.add_instruction_triggered)
